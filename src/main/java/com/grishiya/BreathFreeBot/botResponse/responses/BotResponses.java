@@ -1,4 +1,4 @@
-package botResponse;
+package com.grishiya.BreathFreeBot.botResponse.responses;
 
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
-package config;
+package com.grishiya.BreathFreeBot.botResponse.config;
 
-import controller.BrosatorTgBot;
+import com.grishiya.BreathFreeBot.botResponse.controller.BrosatorTgBot;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
