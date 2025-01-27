@@ -1,30 +1,42 @@
 package com.grishiya.BreathFreeBot.botResponse.services;
 
 import com.grishiya.BreathFreeBot.botResponse.model.UserEntity;
-import com.grishiya.BreathFreeBot.botResponse.model.UserState;
+import com.grishiya.BreathFreeBot.botResponse.model.enums.UserState;
 import com.grishiya.BreathFreeBot.botResponse.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final Map<Long, Integer> userPageIndex = new HashMap<>();
+    private final Set<Long> waitingNameUsers = new HashSet<>();
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public UserEntity findOrCreateUser(Long chatId,  UserState state) {
-        return userRepository.findById(chatId).orElseGet(() -> {
-            UserEntity user = new UserEntity(chatId, null,null, state);
-            return userRepository.save(user);
-        });
+    public void findOrCreateUser(Long chatId, String name) {
+        if (!waitingNameUsers.contains(chatId)) {
+            return;
+        } else {
+            waitingNameUsers.remove(chatId);
+            UserEntity user = new UserEntity();
+            user.setChatId(chatId);
+            user.setName(name);
+            user.setCreatedAt(LocalDateTime.now());
+            user.setState(UserState.BEGIN);
+            userRepository.save(user);
+        }
+    }
+
+    public UserEntity createUser(Long chatId) {
+        UserEntity user = new UserEntity();
+        user.setChatId(chatId);
+        user.setCurrentPage(0);
+        userRepository.save(user);
+        return user; // <-- возвращаем
     }
 
     public Optional<UserEntity> findByChatId(Long chatId) {
@@ -44,6 +56,14 @@ public class UserService {
 
     public void updateUser(UserEntity user) {
         userRepository.save(user);
+    }
+
+    private boolean isWaitingForName(Long chatId) {
+        return waitingNameUsers.contains(chatId);
+    }
+
+    public void setWaitingForName(Long chatId) {
+        waitingNameUsers.add(chatId);
     }
 
 
